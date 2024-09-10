@@ -1,0 +1,26 @@
+[package]
+name = "vex-libunwind"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "High-level Rust bindings for libunwind on VEX V5 robots"
+keywords = ["vex", "v5", "unwind", "libunwind", "backtrace"]
+categories = ["api-bindings", "embedded", "science::robotics", "no-std"]
+authors = [
+    "vexide",
+    "Gavin Niederman <gavinniederman@gmail.com>",
+    "doinkythederp <doinkythederp@icloud.com>",
+    "Tropical",
+]
+repository = "https://github.com/vexide/vex-libunwind"
+homepage = "https://vexide.dev"
+readme = "../../README.md"
+
+[dependencies]
+snafu = { version = "0.8.4", default-features = false, features = [
+    "unstable-core-error",
+] }
+vex-libunwind-sys = { version = "0.1.0", path = "../vex-libunwind-sys" }
+
+[lints]
+workspace = true
