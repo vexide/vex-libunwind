@@ -3,7 +3,7 @@ name = "vex-libunwind-sys"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-description = "FFI bindings to libunwind for VEX V5 robots"
+description = "FFI bindings to LLVM libunwind for VEX V5 robots"
 keywords = ["vex", "v5", "unwind", "libunwind"]
 categories = [
     "external-ffi-bindings",

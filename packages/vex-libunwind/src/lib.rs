@@ -1,13 +1,16 @@
-//! Idiomatic Rust bindings for `libunwind` on VEX V5 robots
+//! Idiomatic Rust bindings for LLVM `libunwind` on VEX V5 robots
 //!
 //! ```no_run
 //! # use vex_libunwind::*;
 //! let context = UnwindContext::new().unwrap();
-//! let mut cursor = UnwindCursor::new();
+//! let mut cursor = UnwindCursor::new(&context);
 //!
 //! loop {
+//!     // Print instruction pointer (i.e. "program counter")
 //!     println!("{:?}", cursor.register(registers::UNW_REG_IP));
+//!
 //!     if !cursor.step().unwrap() {
+//!         // End of stack reached
 //!         break;
 //!     }
 //! }
