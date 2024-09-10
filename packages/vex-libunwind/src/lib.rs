@@ -17,12 +17,7 @@
 //! ```
 #![no_std]
 
-use core::{
-    cell::RefCell,
-    ffi::{c_char, CStr},
-    fmt::Debug,
-    mem::MaybeUninit,
-};
+use core::{cell::RefCell, ffi::CStr, fmt::Debug, mem::MaybeUninit};
 
 use snafu::Snafu;
 pub use vex_libunwind_sys::registers;

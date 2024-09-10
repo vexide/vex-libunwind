@@ -1,5 +1,14 @@
 {
-    "cSpell.words": [],
+    "cSpell.words": [
+        "libunwind",
+        "armv7a",
+        "repr",
+        "fpreg",
+        "getcontext",
+        "uninit",
+        "regname",
+        "lsda"
+    ],
     "rust-analyzer.cargo.allTargets": false,
     "rust-analyzer.check.targets": [
         "${workspaceFolder}/armv7a-vex-v5.json"
