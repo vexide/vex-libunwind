@@ -1,4 +1,4 @@
-//! High-level Rust bindings for libunwind on VEX V5 robots
+//! Idiomatic Rust bindings for libunwind on VEX V5 robots
 #![no_std]
 
 use core::{cell::RefCell, mem::MaybeUninit};
