@@ -27,6 +27,48 @@ loop {
 }
 ```
 
+### Prerequisites
+
+Libunwind will not find stack frames unless you add unwind tables to your program and show it where to find them.
+
+Add unwind tables by updating your target file or using the `-Cforce-unwind-tables=on` rust flag:
+
+```json
+{
+    ...,
+    "default-uwtable": true
+}
+```
+
+Then update your target file to include the unwind tables and the symbols libunwind uses to find them:
+
+```ld
+SECTIONS {
+    /* ... */
+
+    .eh_frame : {
+        __eh_frame_start = .;
+       *(.eh_frame)
+        __eh_frame_end = .;
+    } > RAM
+
+    .eh_framehdr : {
+       __eh_frame_hdr_start = .;
+       *(.eh_framehdr)
+       __eh_frame_hdr_end = .;
+    } > RAM
+
+    .ARM.exidx : {
+        __exidx_start = .;
+        *(.ARM.exidx*)
+        *(.gnu.linkonce.armexidix.*.*)
+        __exidx_end = .;
+    } > RAM
+
+    /* ... */
+}
+```
+
 ### Further Reading
 
 Documentation for LLVM-flavored libunwind: <https://github.com/llvm/llvm-project/blob/main/libunwind/docs/index.rst>
