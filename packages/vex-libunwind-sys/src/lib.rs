@@ -113,8 +113,6 @@ extern "C" {
 
     pub fn unw_set_fpreg(cur: *mut unw_cursor_t, reg: unw_regnum_t, val: unw_fpreg_t) -> c_int;
 
-    pub fn unw_resume(cur: *mut unw_cursor_t) -> c_int;
-
     #[cfg(target_arch = "arm")]
     // Save VFP registers in FSTMX format (instead of FSTMD).
     pub fn unw_save_vfp_as_X(cur: *mut unw_cursor_t);
@@ -135,6 +133,11 @@ extern "C" {
     ) -> c_int;
 
     pub static mut unw_local_addr_space: unw_addr_space_t;
+}
+
+#[link(name = "unwind")]
+extern "C-unwind" {
+    pub fn unw_resume(cur: *mut unw_cursor_t) -> c_int;
 }
 
 pub mod registers {
