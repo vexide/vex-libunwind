@@ -5,7 +5,7 @@
 ## Install
 
 ```
-cargo add --git https://github.com/vexide/vex-libunwind.git
+cargo add vex-libunwind
 ```
 
 ## Usage
