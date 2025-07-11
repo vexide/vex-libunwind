@@ -115,6 +115,14 @@ impl Debug for UnwindContext {
     }
 }
 
+impl From<unw_context_t> for UnwindContext {
+    fn from(context: unw_context_t) -> Self {
+        Self {
+            inner: context.into(),
+        }
+    }
+}
+
 /// A cursor that can move up the call chain and gather information about stack
 /// frames.
 ///
@@ -303,6 +311,14 @@ impl Debug for UnwindCursor {
             s.field("ip", &(ip as *const ())).finish()
         } else {
             s.finish_non_exhaustive()
+        }
+    }
+}
+
+impl From<unw_cursor_t> for UnwindCursor {
+    fn from(cursor: unw_cursor_t) -> Self {
+        Self {
+            inner: cursor.into(),
         }
     }
 }
