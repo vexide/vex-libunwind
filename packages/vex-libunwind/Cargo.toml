@@ -1,26 +1,37 @@
 [package]
 name = "vex-libunwind"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "MIT"
-description = "Idiomatic Rust bindings for LLVM libunwind on VEX V5 robots"
+description = "LLVM libunwind bindings for VEX V5 robots"
 keywords = ["vex", "v5", "unwind", "libunwind", "backtrace"]
 categories = ["api-bindings", "embedded", "science::robotics", "no-std"]
 authors = [
     "vexide",
+    "Lewis McClelland <lewis@lewismcclelland.me>",
     "Gavin Niederman <gavinniederman@gmail.com>",
-    "doinkythederp <doinkythederp@icloud.com>",
     "Tropical",
 ]
 repository = "https://github.com/vexide/vex-libunwind"
 homepage = "https://vexide.dev"
 readme = "../../README.md"
+rust-version = "1.85.0"
 
 [dependencies]
 snafu = { version = "0.8.4", default-features = false, features = [
     "unstable-core-error",
 ] }
-vex-libunwind-sys = { version = "0.1.0", path = "../vex-libunwind-sys" }
+vex-libunwind-sys = { version = "0.1.1", path = "../vex-libunwind-sys" }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+vex-sdk-jumptable = "0.0.2"
+
+[package.metadata.docs.rs]
+targets = ["armv7a-vex-v5"]
+cargo-args = [
+    "-Zbuild-std=std,panic_abort",
+    "-Zbuild-std-features=compiler-builtins-mem",
+]

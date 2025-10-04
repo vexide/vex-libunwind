@@ -17,7 +17,7 @@
 //! ```
 #![no_std]
 
-use core::{cell::RefCell, ffi::CStr, fmt::Debug, mem::MaybeUninit};
+use core::{cell::RefCell, ffi::CStr, fmt::Debug, marker::PhantomData, mem::MaybeUninit};
 
 use snafu::Snafu;
 pub use vex_libunwind_sys::registers;
@@ -78,29 +78,54 @@ impl UnwindError {
     }
 }
 
-/// Holds a snapshot of the state of the CPU's registers at a certain point of
+/// Holds an immutable snapshot of the current CPU's registers at a certain point of
 /// execution.
+///
+/// The context does not contain an entire stack backtrace, just the information
+/// required to begin stepping through the call chain. To do so, create an
+/// [`UnwindCursor`] from the data in this snapshot.
 #[derive(Clone)]
-pub struct UnwindContext {
+pub struct UnwindContext<'a> {
     // RefCells are used because FFI functions that do not mutate take mutable pointers for some
     // reason.
     inner: RefCell<unw_context_t>,
+    _phantom: PhantomData<&'a ()>,
 }
 
-impl UnwindContext {
-    /// Creates a snapshot of the current CPU state, allowing for local
+impl UnwindContext<'_> {
+    /// Captures a snapshot of the current CPU state, allowing for local
     /// unwinding.
+    ///
+    /// The given handler function is passed the unwind context. The context
+    /// is not allowed to escape the current scope because it would be invalidated
+    /// if the stack frame it points to was destroyed.
     #[inline(always)] // Inlining keeps this function from appearing in backtraces
-    pub fn new() -> Result<Self, UnwindError> {
+    pub fn capture<R>(handler: impl FnOnce(Self) -> Result<R, UnwindError>) -> Result<R, UnwindError> {
         let mut inner = MaybeUninit::<unw_context_t>::uninit();
-        // SAFETY: `unw_getcontext` initializes the context struct.
-        let inner = unsafe {
+
+        // SAFETY: `unw_getcontext` initializes the context struct. The context is
+        // created and dropped in the same function, so it will not outlive the current
+        // stack frame.
+        let ctx = unsafe {
             UnwindError::from_code(unw_getcontext(inner.as_mut_ptr()))?;
-            inner.assume_init()
+            Self::from_raw(inner.assume_init())
         };
-        Ok(Self {
-            inner: RefCell::new(inner),
-        })
+
+        handler(ctx)
+    }
+
+    /// Creates a new UnwindContext from a raw context acquired through FFI.
+    ///
+    /// # Safety
+    ///
+    /// The returned context must be dropped before the stack frame it points at is
+    /// destroyed.
+    #[inline(always)]
+    pub const unsafe fn from_raw(raw: unw_context_t) -> Self {
+       Self {
+            inner: RefCell::new(raw),
+            _phantom: PhantomData,
+        }
     }
 
     /// Returns the underlying `libunwind` object.
@@ -109,17 +134,9 @@ impl UnwindContext {
     }
 }
 
-impl Debug for UnwindContext {
+impl Debug for UnwindContext<'_> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("UnwindContext").finish_non_exhaustive()
-    }
-}
-
-impl From<unw_context_t> for UnwindContext {
-    fn from(context: unw_context_t) -> Self {
-        Self {
-            inner: context.into(),
-        }
     }
 }
 
@@ -128,16 +145,18 @@ impl From<unw_context_t> for UnwindContext {
 ///
 /// This struct provides functionality for reading and writing the CPU registers
 /// that were preserved in stack frames, as well as moving "up" the call chain
-/// to previous function calls.
+/// to previous function calls. It can be initialized to point to a certain frame
+/// using the data in an [`UnwindContext`].
 #[derive(Clone)]
-pub struct UnwindCursor {
+pub struct UnwindCursor<'a> {
     inner: RefCell<unw_cursor_t>,
+    _phantom: PhantomData<&'a ()>,
 }
 
-impl UnwindCursor {
+impl<'a> UnwindCursor<'a> {
     /// Initializes a cursor for local unwinding using the state captured by the
     /// given [`UnwindContext`].
-    pub fn new(context: &UnwindContext) -> Result<Self, UnwindError> {
+    pub fn new(context: &UnwindContext<'a>) -> Result<Self, UnwindError> {
         let mut cursor = MaybeUninit::<unw_cursor_t>::uninit();
         // SAFETY: `unw_init_local` initializes the cursor struct. A reference to
         // `context` is not stored in the cursor.
@@ -148,8 +167,10 @@ impl UnwindCursor {
             ))?;
             cursor.assume_init()
         };
+
         Ok(Self {
             inner: RefCell::new(cursor),
+            _phantom: context._phantom,
         })
     }
 
@@ -302,23 +323,29 @@ impl UnwindCursor {
             Some(str)
         }
     }
+
+    /// Creates a new UnwindCursor from a raw cursor acquired through FFI.
+    ///
+    /// # Safety
+    ///
+    /// The returned cursor must be dropped before the stack frame it points at is
+    /// destroyed.
+    #[inline(always)]
+    pub const unsafe fn from_raw(raw: unw_cursor_t) -> Self {
+       Self {
+            inner: RefCell::new(raw),
+            _phantom: PhantomData,
+        }
+    }
 }
 
-impl Debug for UnwindCursor {
+impl Debug for UnwindCursor<'_> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut s = f.debug_struct("UnwindCursor");
         if let Ok(ip) = self.register(registers::UNW_REG_IP) {
             s.field("ip", &(ip as *const ())).finish()
         } else {
             s.finish_non_exhaustive()
-        }
-    }
-}
-
-impl From<unw_cursor_t> for UnwindCursor {
-    fn from(cursor: unw_cursor_t) -> Self {
-        Self {
-            inner: cursor.into(),
         }
     }
 }

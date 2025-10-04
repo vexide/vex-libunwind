@@ -97,7 +97,7 @@ pub struct unw_proc_info_t {
 }
 
 #[link(name = "unwind")]
-extern "C" {
+unsafe extern "C" {
     pub fn unw_getcontext(ctx: *mut unw_context_t) -> c_int;
 
     pub fn unw_init_local(cur: *mut unw_cursor_t, ctx: *mut unw_context_t) -> c_int;
@@ -136,7 +136,7 @@ extern "C" {
 }
 
 #[link(name = "unwind")]
-extern "C-unwind" {
+unsafe extern "C-unwind" {
     pub fn unw_resume(cur: *mut unw_cursor_t) -> c_int;
 }
 
