@@ -107,7 +107,7 @@ unsafe extern "C" {
     pub fn unw_get_reg(cur: *mut unw_cursor_t, reg: unw_regnum_t, val: *mut unw_word_t) -> c_int;
 
     pub fn unw_get_fpreg(cur: *mut unw_cursor_t, reg: unw_regnum_t, val: *mut unw_fpreg_t)
-        -> c_int;
+    -> c_int;
 
     pub fn unw_set_reg(cur: *mut unw_cursor_t, reg: unw_regnum_t, val: unw_word_t) -> c_int;
 

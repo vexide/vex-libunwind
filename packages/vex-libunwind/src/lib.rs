@@ -78,8 +78,8 @@ impl UnwindError {
     }
 }
 
-/// Holds an immutable snapshot of the current CPU's registers at a certain point of
-/// execution.
+/// Holds an immutable snapshot of the current CPU's registers at a certain
+/// point of execution.
 ///
 /// The context does not contain an entire stack backtrace, just the information
 /// required to begin stepping through the call chain. To do so, create an
@@ -97,10 +97,12 @@ impl UnwindContext<'_> {
     /// unwinding.
     ///
     /// The given handler function is passed the unwind context. The context
-    /// is not allowed to escape the current scope because it would be invalidated
-    /// if the stack frame it points to was destroyed.
+    /// is not allowed to escape the current scope because it would be
+    /// invalidated if the stack frame it points to was destroyed.
     #[inline(always)] // Inlining keeps this function from appearing in backtraces
-    pub fn capture<R>(handler: impl FnOnce(Self) -> Result<R, UnwindError>) -> Result<R, UnwindError> {
+    pub fn capture<R>(
+        handler: impl FnOnce(Self) -> Result<R, UnwindError>,
+    ) -> Result<R, UnwindError> {
         let mut inner = MaybeUninit::<unw_context_t>::uninit();
 
         // SAFETY: `unw_getcontext` initializes the context struct. The context is
@@ -118,11 +120,11 @@ impl UnwindContext<'_> {
     ///
     /// # Safety
     ///
-    /// The returned context must be dropped before the stack frame it points at is
-    /// destroyed.
+    /// The returned context must be dropped before the stack frame it points at
+    /// is destroyed.
     #[inline(always)]
     pub const unsafe fn from_raw(raw: unw_context_t) -> Self {
-       Self {
+        Self {
             inner: RefCell::new(raw),
             _phantom: PhantomData,
         }
@@ -145,8 +147,8 @@ impl Debug for UnwindContext<'_> {
 ///
 /// This struct provides functionality for reading and writing the CPU registers
 /// that were preserved in stack frames, as well as moving "up" the call chain
-/// to previous function calls. It can be initialized to point to a certain frame
-/// using the data in an [`UnwindContext`].
+/// to previous function calls. It can be initialized to point to a certain
+/// frame using the data in an [`UnwindContext`].
 #[derive(Clone)]
 pub struct UnwindCursor<'a> {
     inner: RefCell<unw_cursor_t>,
@@ -328,11 +330,11 @@ impl<'a> UnwindCursor<'a> {
     ///
     /// # Safety
     ///
-    /// The returned cursor must be dropped before the stack frame it points at is
-    /// destroyed.
+    /// The returned cursor must be dropped before the stack frame it points at
+    /// is destroyed.
     #[inline(always)]
     pub const unsafe fn from_raw(raw: unw_cursor_t) -> Self {
-       Self {
+        Self {
             inner: RefCell::new(raw),
             _phantom: PhantomData,
         }
