@@ -1,6 +1,6 @@
 [package]
 name = "vex-libunwind"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 license = "MIT"
 description = "LLVM libunwind bindings for VEX V5 robots"
@@ -21,7 +21,7 @@ rust-version = "1.85.0"
 snafu = { version = "0.8.4", default-features = false, features = [
     "unstable-core-error",
 ] }
-vex-libunwind-sys = { version = "0.1.1", path = "../vex-libunwind-sys" }
+vex-libunwind-sys = { version = "0.1.3", path = "../vex-libunwind-sys" }
 
 [lints]
 workspace = true
@@ -35,3 +35,6 @@ cargo-args = [
     "-Zbuild-std=std,panic_abort",
     "-Zbuild-std-features=compiler-builtins-mem",
 ]
+
+[badges.maintenance]
+status = "passively-maintained"

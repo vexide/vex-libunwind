@@ -2,6 +2,9 @@
 
 > Idiomatic Rust bindings for LLVM libunwind on VEX V5 robots
 
+**Development status:** Passively maintained (There are no plans for new features, but the
+maintainer intends to respond to issues that get filed.)
+
 ## Install
 
 ```
